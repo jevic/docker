@@ -1,0 +1,85 @@
+Django1.9.8
+
+urls.py
+网址入口，关联到对应的views.py中的一个函数（或者generic类），访问网址就对应一个函数。
+
+views.py
+处理用户发出的请求，从urls.py中对应过来, 通过渲染templates中的网页可以将显示内容，比如登陆后的用户名，用户请求的数据，输出到网页。
+
+models.py
+与数据库操作相关，存入或读取数据时用到这个，当然用不到数据库的时候 你可以不使用。
+
+forms.py
+表单，用户在浏览器上输入数据提交，对数据的验证工作以及输入框的生成等工作，当然你也可以不使用。
+
+templates 文件夹
+
+views.py 中的函数渲染templates中的Html模板，得到动态内容的网页，当然可以用缓存来提高速度。
+
+admin.py
+后台，可以用很少量的代码就拥有一个强大的后台。
+
+settings.py
+Django 的设置，配置文件，比如 DEBUG 的开关，静态文件的位置等
+
+安装数据库以及MySQLdb模块
+sudo apt-get install mysql-server-5.6 mysql-client-5.6
+sudo apt-get install libmysqlclient-dev libmysqld-dev
+sudo apt-get install python-pip
+sudo apt-get install python-dev
+sudo pip install mysql-python
+
+django-admin startproject websit
+django-admin startapp app
+
+
+root@jay:/opt/tmpweb# tree
+.
+├── learn
+│   ├── admin.py
+│   ├── admin.pyc
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── __init__.pyc
+│   ├── migrations
+│   │   ├── __init__.py
+│   │   └── __init__.pyc
+│   ├── models.py
+│   ├── models.pyc
+│   ├── templates
+│   │   └── home.html
+│   ├── tests.py
+│   ├── views.py
+│   └── views.pyc
+├── manage.py
+└── tmpweb
+    ├── __init__.py
+    ├── __init__.pyc
+    ├── settings.py
+    ├── settings.pyc
+    ├── urls.py
+    ├── urls.pyc
+    ├── wsgi.py
+    └── wsgi.pyc
+
+
+from django.shortcuts import render #默认
+from django.http import HttpResponse #调用网页
+from django.shortcuts import redirect #跳转
+from django.http import HttpResponseRedirect 
+from django.core.urlresolvers import reverse 
+# Django 1.9.x 及以上同步数据库命令：
+python manage.py migrate
+setting.py:数据库设置 注意数据库用户的权限配置！！！
+# https://docs.djangoproject.com/en/1.9/ref/settings/#absolute-url-overrides
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mydatabase',
+       #'NAME': os.path.join(BASE_DIR, 'db.mysql'),
+        'USER': 'mydatabaseuser',
+        'PASSWORD': 'mypassword',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
