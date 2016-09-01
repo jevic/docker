@@ -1,5 +1,5 @@
 Django1.9.8
-
+Date 2016.9.1
 urls.py
 网址入口，关联到对应的views.py中的一个函数（或者generic类），访问网址就对应一个函数。
 
