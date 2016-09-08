@@ -1,7 +1,7 @@
 #!/bin/bash
 #description: PHP install script
 #date: 2016-08-25
-# jie.yang
+#jie.yang  zxf_668899@163.com
 #
 ### Variable declaration ###
 Sdir="`pwd`"

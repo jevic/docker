@@ -1,0 +1,170 @@
+---->>> DockerFile:
+INSTRUCTION argument指令不区分大小写。但是，命名约定为全部大写
+所有Dockerfile都必须以FROM命令开始。 FROM命令会指定镜像基于哪个基础镜像创建，接下来的命令也会基于这个基础镜像。
+FROM命令可以多次使用，表示会创建多个镜像。具体语法如下：
+FROM <image name>
+
+FROM centos   基于centos这个镜像来构建
+
+MAINTAINER <author name>  镜像作者
+
+RUN 《command》
+
+ADD：复制文件指令。它有两个参数<source>和<destination>。destination是容器内的路径。source可以是URL或者是启动配置上下文中的一个文件
+ADD <src> <destiantion>
+ 
+CMD：提供了容器默认的执行命令。 Dockerfile只允许使用一次CMD指令。 使用多个CMD会抵消之前所有的指令，只有最后一个指令生效。 CMD有三种形式：
+CMD ["executable","param1","param2"]
+CMD ["param1","param2"]
+CMD command param1 param2
+
+EXPOSE：指定容器在运行时监听的端口
+EXPOSE <port>
+
+ENTRYPOINT：配置给容器一个可执行的命令，这意味着在每次使用镜像创建容器时一个特定的应用程序可以被设置为默认程序。同时也意味着该镜像每次被调用时仅能运行指定的应用。类似于CMD，Docker只允许一个ENTRYPOINT，多个ENTRYPOINT会抵消之前所有的指令，只执行最后的ENTRYPOINT指令。语法如下：
+ENTRYPOINT ["executable","param1","param2"]
+ENTRYPOINT command param1 param2
+
+WORKDIR：指定RUN、CMD与ENTRYPOINT命令的工作目录
+WORKDIR /path/to/workdir
+
+ENV 设置环境变量，它们使用键值对，增加运行程序的灵活性
+ENV <key> <value>
+
+USER :镜像运行时设置一个UID
+USER <uid>
+
+VOLUME : 授权访问从容器内到主机上的目录
+VOLUME ['/data']
+
+
+Dockerfile创建支持ssh服务自启动的容器镜像
+[root@docker]# vim /etc/docker/Dockerfile
+[root@docker docker]# cat Dockerfile 
+#选择一个镜像作为基础
+FROM docker.io/centos:6
+#作者信息
+MAINTAINER jie Yang "jie@163.com"
+#安装的软件包 
+RUN yum install -y openssh-server sudo
+#Centos7.2无需此项：
+#RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
+#添加用户并设置sudo
+
+RUN echo "123456" |passwd --stdin root
+RUN mkdir -p /root/.ssh && chown root.root /root && chmod 700 /root/.ssh
+
+
+RUN useradd admin
+RUN echo "admin:admin" | chpasswd
+RUN echo "admin   ALL=(ALL)       ALL" >> /etc/sudoers
+#centos6必须有，否则无法登录 
+RUN ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
+#Centos7：
+RUN ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key
+RUN ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key
+
+#ADD authorized_keys /root/.ssh/authorized_keys
+#ADD run.sh /run.sh
+#RUN chmod 755 /run.sh
+
+#创建锁文件
+RUN mkdir /var/run/sshd
+#指定端口
+EXPOSE 22
+#启动sshd
+CMD ["/usr/sbin/sshd", "-D"]
+#CMD ["/run.sh"]
+############################################
+# cat run.sh
+#!/bin/bash
+/usr/sbin/sshd -D
+
+
+[root@docker docker]# docker build -t centos6-ssh .   << 创建容器
+[root@docker docker]# docker run -d -P --name=myssh centos-ssh
+[root@docker docker]# docker inspect testssh|grep "IPAddress"
+        "SecondaryIPAddresses": null,
+        "IPAddress": "172.17.0.3",
+                "IPAddress": "172.17.0.3",  << 容器IP
+
+[root@docker docker]# ssh admin@<容器IP>
+
+另外也可以通过docker的端口映射来访问
+[root@docker docker]# docker port testssh 22
+0.0.0.0:32768
+[root@docker docker]# ssh admin@<宿主机ip> -p <32768>
+
+
+启动httpd:
+CMD ["/usr/sbin/apachectl","-D","FOREGROUND"]
+
+
+
+root@9c0a3a771788:/docker-registry# cat Dockerfile 
+# VERSION 0.1
+# DOCKER-VERSION  0.7.3
+# AUTHOR:         Sam Alba <sam@docker.com>
+# DESCRIPTION:    Image with docker-registry project and dependecies
+# TO_BUILD:       docker build -rm -t registry .
+# TO_RUN:         docker run -p 5000:5000 registry
+
+# Latest Ubuntu LTS
+FROM ubuntu:14.04
+
+# Update
+RUN apt-get update \
+# Install pip
+    && apt-get install -y \
+        swig \
+        python-pip \
+# Install deps for backports.lmza (python2 requires it)
+        python-dev \
+        libssl-dev \
+        liblzma-dev \
+        libevent1-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /docker-registry
+COPY ./config/boto.cfg /etc/boto.cfg
+
+# Install core
+RUN pip install /docker-registry/depends/docker-registry-core
+
+# Install registry
+RUN pip install file:///docker-registry#egg=docker-registry[bugsnag,newrelic,cors]
+
+RUN patch \
+ $(python -c 'import boto; import os; print os.path.dirname(boto.__file__)')/connection.py \
+ < /docker-registry/contrib/boto_header_patch.diff
+
+ENV DOCKER_REGISTRY_CONFIG /docker-registry/config/config_sample.yml
+ENV SETTINGS_FLAVOR dev
+
+EXPOSE 5000
+
+CMD ["docker-registry"]
+
+
+
+
+
+
+FROM centos7:ip
+RUN yum install -y gcc gcc-c++ openssl-devel pcre-devel zlib-devel net-tools
+ADD http://192.168.152.2/Docker/nginx-1.8.1-jevic.tar.gz /tmp/
+RUN cd /tmp/nginx-1.8.1 && \
+    ./configure --prefix=/usr/local/nginx && \
+    make && \
+    make install
+
+EXPOSE 80
+CMD ["/usr/local/nginx/sbin/nginx","-c","/usr/local/nginx/conf/nginx.conf"]
+
+
+
+
+
+
+
