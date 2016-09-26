@@ -33,7 +33,7 @@ ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
 # sudo systemctl enable docker
 # sudo systemctl start docker
  
-
+[root@docker ~]# systemctl show docker
 [root@docker ~]# docker pull centos   下载镜像
 [root@docker ~]# docker info
 [root@docker ~]# docker version
@@ -124,19 +124,22 @@ rootfs                100G  383M  100G   1% /
 
 		
 ##旧版本-->略过此处				   
-[root@docker ~]# docker run centos /bin/echo hello   #出现警告
-Usage of loopback devices is strongly discouraged for production use. Either use `--storage-
-opt dm.thinpooldev` or use `--storage-opt dm.no_warn_on_loop_devices=true` to suppress this warning.
-hello
-[root@docker ~]# vim /etc/sysconfig/docker-storage   #编辑此文件添加下列参数即可！！
-DOCKER_STORAGE_OPTIONS="--storage-opt dm.no_warn_on_loop_devices=true"
-[root@docker ~]# docker restart docker
+#[root@docker ~]# docker run centos /bin/echo hello   #出现警告
+#Usage of loopback devices is strongly discouraged for production use. Either use `--storage-
+#opt dm.thinpooldev` or use `--storage-opt dm.no_warn_on_loop_devices=true` to suppress this warning.
+#hello
+#[root@docker ~]# vim /etc/sysconfig/docker-storage   #编辑此文件添加下列参数即可！！
+#DOCKER_STORAGE_OPTIONS="--storage-opt dm.no_warn_on_loop_devices=true"
+#[root@docker ~]# docker restart docker
 
 
 【私有仓库构建】
+https://docs.docker.com/registry/deploying/
+https://docs.docker.com/engine/reference/commandline/dockerd/#insecure-registries
 # docker run -d -p 5000:5000 registry  
 -v <src>:<dest> [Bind mount a volume] 将上传的镜像放到/opt/data/registry
-docker run -d -p 5000:5000 -v /opt/data/registry:/tmp/registry registry
+# docker run -d -p 5000:5000 --name registry --restart=always -v /opt/data/registry:/var/lib/registry registry
+daemon -->>>>    --insecure-registry myregistry:5000
 
 
 -p:指定容器启动后docker上运行的端口映射，第一个为主机端口第二个为容器里的端口
@@ -228,13 +231,8 @@ docker run -rm -d /root/.bash_history:/.bash_history centos7 /bin/bash
 # docker run -itd --volumes-from=volumes1 --volume-driver=/mydata --name votest1 centos:6.8
 # docker run -itd --volumes-from=volumes1 --volume-driver=/mydata --name votest2 centos:6.8
 3.>> 三个容器共享/mydata数据卷，都可以读写
-
 注意：数据卷容器自身(volumes)并不需要保持运行状态！即使删除容器db1,db2，数据卷容器mydata里面的数据依旧存在；
 
-
-
-iptables -t nat -A PREROUTING -p tcp -m tcp --dport 90 -j DNAT --to-destination 172.17.0.2:80
-/sbin/iptables -t nat -A DOCKER -p tcp -d 0/0 --dport 5000 -j DNAT --to-destination 192.168.152.1:5000 ! -i br0
 
 
 容器互联：
@@ -245,22 +243,19 @@ docker run -d -P --name=web --link mysql:db centos:7 /bin/bash
 
 
 docker 【本地和网络】守护进程：
+https://docs.docker.com/engine/reference/commandline/dockerd/#insecure-registries
 CentOS7: --->>> Docker1.10
 root@Mini ~]# cat /etc/sysconfig/docker|egrep -v "^#|^$"   环境变量配置文件！
 OPTIONS='--selinux-enabled --log-driver=journald'
 DOCKER_CERT_PATH=/etc/docker
 DOCKER_OPTS=‘-H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375'
-
 [root@Mini ~]# cat /usr/lib/systemd/system/docker.service
 ExecStart=/usr/bin/docker-current daemon $DOCKER_OPTS \
           --exec-opt native.cgroupdriver=systemd \
           $OPTIONS \
           ........
-[root@Mini ~]# systemctl daemon-reload
-[root@Mini ~]# systemctl restart docker
-[root@Mini ~]# netstat -tnlp|grep docker;ps -ef|grep docker
-tcp6       0      0 :::2375                 :::*                 LISTEN      2917/docker-current
-root       2917   1  0 12:23 ?        00:00:00 /usr/bin/docker-current daemon -H tcp://0.0.0.0:2375 --exec-opt native.cgroupdriver=systemd --selinux-enabled --log-driver=journald
+[root@Mini ~]# systemctl daemon-reload && systemctl restart docker
+
 
 
 Ubuntu:
@@ -278,5 +273,11 @@ blkio      cpu      cpu,cpuacct  devices  hugetlb  net_cls           net_prio   
 cgmanager  cpuacct  cpuset       freezer  memory   net_cls,net_prio  perf_event  systemd
 root@jay:/sys/fs/cgroup#
 
+### Compose
+https://docs.docker.com/compose/install/
+curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` \
+>/usr/local/bin/docker-compose
 
+### Shipyard
+https://shipyard-project.com/
 
