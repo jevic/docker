@@ -1,3 +1,6 @@
+[详细介绍请访问Docker官网](https://docs.docker.com/engine/userguide/storagedriver/overlayfs-driver/#docker-and-overlayfs-in-practice)
+=====
+##### docker镜像驱动不止是overlayfs一种，还有aufs，device mapper方式，但原理基本一致，而且overlayfs是相对比较新的一种方式!
 <h3>overlayFS简单实战</h3>
 <p>1.如何判断内核中加载了overlay<br />
 <code>root@qa-control-pub-ci-build1:~# lsmod |grep over overlay 28140 0</code><br />
