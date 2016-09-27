@@ -1,7 +1,7 @@
 [查看官网](https://docs.docker.com/engine/userguide/storagedriver/device-mapper-driver/#image-layering-and-sharing)
-* Log in to the Docker host you want to configure and stop the Docker daemon.
-* Install the LVM2 package. The LVM2 package includes the userspace toolset that provides logical volume management facilities on linux.
-* Create a physical volume replacing /dev/xvdf with your block device.
+###### Log in to the Docker host you want to configure and stop the Docker daemon.
+###### Install the LVM2 package. The LVM2 package includes the userspace toolset that provides logical volume management facilities on linux.
+###### Create a physical volume replacing /dev/xvdf with your block device.
 
 $ systemctl stop docker
 $ pvcreate /dev/xvdf
