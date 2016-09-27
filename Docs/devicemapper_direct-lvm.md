@@ -3,9 +3,9 @@
 ###### Install the LVM2 package. The LVM2 package includes the userspace toolset that provides logical volume management facilities on linux.
 ###### Create a physical volume replacing /dev/xvdf with your block device.
 
-$ systemctl stop docker
-$ pvcreate /dev/xvdf
-$ vgcreate docker /dev/xvdf
+	$ systemctl stop docker
+	$ pvcreate /dev/xvdf
+	$ vgcreate docker /dev/xvdf
 
 * Create a thin pool named thinpool.
 * In this example, the data logical is 95% of the ‘docker’ volume group size.
