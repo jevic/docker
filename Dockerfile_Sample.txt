@@ -53,8 +53,6 @@ RUN yum install -y openssh-server sudo
 
 RUN echo "123456" |passwd --stdin root
 RUN mkdir -p /root/.ssh && chown root.root /root && chmod 700 /root/.ssh
-
-
 RUN useradd admin
 RUN echo "admin:admin" | chpasswd
 RUN echo "admin   ALL=(ALL)       ALL" >> /etc/sudoers
@@ -82,89 +80,119 @@ CMD ["/usr/sbin/sshd", "-D"]
 /usr/sbin/sshd -D
 
 
-[root@docker docker]# docker build -t centos6-ssh .   << 创建容器
-[root@docker docker]# docker run -d -P --name=myssh centos-ssh
-[root@docker docker]# docker inspect testssh|grep "IPAddress"
-        "SecondaryIPAddresses": null,
-        "IPAddress": "172.17.0.3",
-                "IPAddress": "172.17.0.3",  << 容器IP
-
-[root@docker docker]# ssh admin@<容器IP>
-
-另外也可以通过docker的端口映射来访问
-[root@docker docker]# docker port testssh 22
-0.0.0.0:32768
-[root@docker docker]# ssh admin@<宿主机ip> -p <32768>
-
-
 启动httpd:
 CMD ["/usr/sbin/apachectl","-D","FOREGROUND"]
 
 
+*************************************************
+Redis----
+FROM centos:7
+MAINTAINER Jay.yang <zxf668899@163.com>
 
-root@9c0a3a771788:/docker-registry# cat Dockerfile 
-# VERSION 0.1
-# DOCKER-VERSION  0.7.3
-# AUTHOR:         Sam Alba <sam@docker.com>
-# DESCRIPTION:    Image with docker-registry project and dependecies
-# TO_BUILD:       docker build -rm -t registry .
-# TO_RUN:         docker run -p 5000:5000 registry
+RUN yum -y install gcc gcc-c++ make wget \
+	&& cd /opt \
+	&& curl http://download.redis.io/releases/redis-3.0.3.tar.gz|tar zx \
+        && wget https://github.com/zxf668899/PHP-Nginx/blob/master/NoSql/redis.conf \
+        && cd redis-3.0.3 && make && make install \
+        && mkdir -p /usr/local/redis/etc \
+	&& mv /opt/redis.conf /usr/local/redis/etc \
+	&& yum -y remove gcc make wget \
+        && yum clean all \
+        && rm -rf /tmp/* /opt/* /var/cache/{yum,ldconfig}
 
-# Latest Ubuntu LTS
-FROM ubuntu:14.04
+EXPOSE 6379
+CMD ["/usr/local/bin/redis-server","/usr/local/redis/etc/redis.conf"]
 
-# Update
-RUN apt-get update \
-# Install pip
-    && apt-get install -y \
-        swig \
-        python-pip \
-# Install deps for backports.lmza (python2 requires it)
-        python-dev \
-        libssl-dev \
-        liblzma-dev \
-        libevent1-dev \
-    && rm -rf /var/lib/apt/lists/*
+*************************************************
+PHP&Nginx----
+FROM centos:7.2
+MAINTAINER allone
 
-COPY . /docker-registry
-COPY ./config/boto.cfg /etc/boto.cfg
-
-# Install core
-RUN pip install /docker-registry/depends/docker-registry-core
-
-# Install registry
-RUN pip install file:///docker-registry#egg=docker-registry[bugsnag,newrelic,cors]
-
-RUN patch \
- $(python -c 'import boto; import os; print os.path.dirname(boto.__file__)')/connection.py \
- < /docker-registry/contrib/boto_header_patch.diff
-
-ENV DOCKER_REGISTRY_CONFIG /docker-registry/config/config_sample.yml
-ENV SETTINGS_FLAVOR dev
-
-EXPOSE 5000
-
-CMD ["docker-registry"]
-
-
-
-
-
-
-FROM centos7:ip
-RUN yum install -y gcc gcc-c++ openssl-devel pcre-devel zlib-devel net-tools
-ADD http://192.168.152.2/Docker/nginx-1.8.1-jevic.tar.gz /tmp/
-RUN cd /tmp/nginx-1.8.1 && \
-    ./configure --prefix=/usr/local/nginx && \
-    make && \
-    make install
+RUN yum -y install \
+        apr-devel apr-util-devel cmake \
+        gcc gcc-c++ GeoIP GeoIP-devel libtool \
+        perl-devel perl-ExtUtils-Embed make \
+        wget \
+        && cd /opt \
+        && wget http://10.2.229.10/Nginx-PHP7-SourcePackage.tar.gz \
+        && tar zxf Nginx-PHP7-SourcePackage.tar.gz \
+        && cd Nginx-PHP7-SourcePackage \
+        && ./docker-install.sh \
+        && yum -y remove gcc cmake make wget iptables \
+        && yum clean all \
+        && rm -rf /tmp/* /opt/* /var/cache/{yum,ldconfig}
 
 EXPOSE 80
-CMD ["/usr/local/nginx/sbin/nginx","-c","/usr/local/nginx/conf/nginx.conf"]
+CMD ["./entrypoint.sh"]
 
+# ./nginx -t
+./nginx: error while loading shared libraries: libprofiler.so.0: cannot open shared object file: No such fil
+e or directory
+# ldd nginx 
+	linux-vdso.so.1 =>  (0x00007ffdef7f4000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007faca4ae5000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007faca48c9000)
+	libcrypt.so.1 => /lib64/libcrypt.so.1 (0x00007faca4691000)
+	libprofiler.so.0 => not found     ##《《《《《《
+	libc.so.6 => /lib64/libc.so.6 (0x00007faca42cf000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007faca4cee000)
+	libfreebl3.so => /lib64/libfreebl3.so (0x00007faca40cb000)
+ln -s /usr/local/lib/libprofiler.so /lib64/libprofiler.so.0		
 
+*************************************************
+FROM centos:7.2
+MAINTAINER Jay.yang <zxf668899@163.com>
 
+RUN yum -y install \
+        apr-devel apr-util-devel cmake \
+        gcc gcc-c++ GeoIP GeoIP-devel libtool \
+        perl-devel perl-ExtUtils-Embed make \
+        && cd /opt \
+        && curl http://10.2.229.10/php-one.tar.gz|tar zx \
+        && cd php-one \
+        && ./docker-php.sh \
+        && yum -y remove gcc cmake make \
+        && yum clean all \
+        && rm -rf /tmp/* /opt/* /var/cache/{yum,ldconfig}
 
+CMD ["/usr/local/php/sbin/php-fpm"]
 
+*************************************************
+FROM centos:7
+MAINTAINER jie.yang <"zxf668899@163.com">
+
+RUN yum -y install wget && \
+		wget https://github.com/zxf668899/Docker_nginx/blob/master/ssdb.tar.gz && \
+		tar zxf ssdb.tar.gz -C /usr/local/
+        mv ssdb /usr/local && \
+        mkdir /etc/ssdb && mkdir /var/lib/ssdb && \
+        cp /usr/local/ssdb/ssdb-server /usr/bin && \
+        mv /usr/local/ssdb/ssdb.conf /etc/ssdb && \
+        yum -y remove tar curl vim-minimal
+
+EXPOSE 8888
+CMD ["/usr/local/ssdb/ssdb-server","/etc/ssdb/ssdb.conf"]
+
+*************************************************
+FROM centos:7
+MAINTAINER jie.yang <"zxf668899@163.com">
+
+RUN yum update -y && \
+  yum -y install --setopt=tsflags=nodocs make wget which autoconf unzip gcc gcc-c++ && \
+  wget --no-check-certificate https://github.com/ideawu/ssdb/archive/master.zip && \
+  unzip master.zip && \
+  cd ssdb-master && \
+  make && make install && \
+  cd .. && \
+  yum -y erase vim-minimal unzip wget tar gcc gcc-c++ make which autoconf && \
+  yum clean all && \
+  rm -rf ssdb-master master.zip /var/lib/yum/* /tmp/* /var/tmp/* && \
+  mkdir /etc/ssdb && \
+  mkdir /etc/ssdb/var && \
+  mv /usr/local/ssdb/ssdb.conf /etc/ssdb/
+
+EXPOSE 8888
+VOLUME [/usr/local/ssdb, /etc/ssdb]
+ENTRYPOINT /usr/local/ssdb/ssdb-server /etc/ssdb/ssdb.conf
 
 

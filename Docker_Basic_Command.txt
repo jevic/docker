@@ -69,8 +69,19 @@ ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
 [root@docker ~]# docker rmi -f 9503b09c1a70
 Deleted: 9503b09c1a707d29b084e18aa13ef5d66f43672e41dce4db5931cbf2a754daa1
 
+Docker提供了一个非常强大的命令diff，它可以列出容器内发生变化的文件和目录。
+这些变化包括添加（A-add）、删除（D-delete）、修改（C-change）。
+该命令便于Debug，并支持快速的共享环境。
+[root@docker ~]# docker diff container
 
-
+save 【持久化镜像】导入导出：
+[root@docker ~]# docker save centos:7 > /home/save.tar
+[root@docker ~]# docker load < /home/save.tar
+export【持久化容器】导入导出：
+[root@docker ~]# docker export [id] > [imagesname.tar]   导出镜像
+[root@docker ~]# cat /home/export.tar | docker import - busybox-1-export:latest
+远程路径导入：
+[root@docker ~]# docker import http://example.com/test.tar
 
 5. 保存对容器的修改（commit）
 当你对某一个容器做了修改之后（通过在容器中运行某一个命令），可以把对容器的修改保存下来，这样下次可以从保存后的最新状态运行该容器。
@@ -78,59 +89,12 @@ Deleted: 9503b09c1a707d29b084e18aa13ef5d66f43672e41dce4db5931cbf2a754daa1
 docker ps -l 查看ID
 [root@docker ~]# docker commit ID new_image_name
 Note:image相当于类，container相当于实例，不过可以动态给实例安装新软件，然后把这个container用commit命令固化成一个image
-
-
 [root@docker ~]# docker rm $(docker ps -q -a)    #删除所有运行的容器
 
 ---->>>
 将容器中的文件拷贝到主机上
 Usage: docker cp CONTAINER:PATH HOSTPATH
 [root@docker ~]# docker cp testip:/tmp/testaa /tmp
-
-
---->>> 磁盘调整：
-[root@docker sysconfig]# cat /etc/sysconfig/docker-storage|tail -1
-DOCKER_STORAGE_OPTIONS='--storage-opt dm.no_warn_on_loop_devices=true'
-指定容器默认分配的磁盘大小    >>>>  "--storage-opt dm.basesize=20G"
-
-1.）查看宿主机分配的docker容器存储：
-[root@docker ~]# ls /dev/mapper/docker-253\:0-102573667-*
-/dev/mapper/docker-253:0-102573667-1e18182099ba7e7e5f63c3f3e3fd785fa77c000a424de1420dbaf3410c094977
-
-2.）查看docker容器使用的存储空间：
-[root@1e18182099ba ~]# df -h|head -3
-Filesystem            Size  Used Avail Use% Mounted on
-rootfs                100G  383M  100G   1% /
-/dev/mapper/docker-253:0-102573667-1e18182099ba7e7e5f63c3f3e3fd785fa77c000a424de1420dbaf3410c094977
-
-3.）查看容器扇区信息
-# dmsetup table docker-253:0-102573667-1e18182099ba7e7e5f63c3f3e3fd785fa77c000a424de1420dbaf3410c094977     
-0 209715200 thin 253:3 189
-4.）第二个数字是设备的大小，表示有多少个512bytes扇区，
-[root@docker ~]# echo $((100*1024*1024*1024/512))   << 100G 所占用的扇区
-209715200
-
-4.） 修改卷信息表
-[root@docker ~]# echo $((150*1024*1024*1024/512))  << 调整为150G
-314572800
-[root@docker ~]# echo 0 314572800 thin 253:3 189|dmsetup load docker-253:0-102573667-1e18182099ba7e7e5f63c3f3e
-3fd785fa77c000a424de1420dbaf3410c094977
-[root@docker ~]# dmsetup resume docker-253:0-102573667-1e18182099ba7e7e5f63c3f3e3fd785fa77c000a424de1420dbaf34
-10c094977
-修改文件系统大小：
-[root@docker ~]# resize2fs /dev/mapper/docker-253:0-102573667-1e18182099ba7e7e5f63c3f3e3fd785fa77c000a424de142
-0dbaf3410c094977
-
-
-		
-##旧版本-->略过此处				   
-#[root@docker ~]# docker run centos /bin/echo hello   #出现警告
-#Usage of loopback devices is strongly discouraged for production use. Either use `--storage-
-#opt dm.thinpooldev` or use `--storage-opt dm.no_warn_on_loop_devices=true` to suppress this warning.
-#hello
-#[root@docker ~]# vim /etc/sysconfig/docker-storage   #编辑此文件添加下列参数即可！！
-#DOCKER_STORAGE_OPTIONS="--storage-opt dm.no_warn_on_loop_devices=true"
-#[root@docker ~]# docker restart docker
 
 
 【私有仓库构建】
@@ -159,7 +123,6 @@ docker run -d --restart=always --name test centos:7 /bin/bash
 [root@docker ~]# cat /etc/sysconfig/docker-network
 DOCKER_NETWORK_OPTIONS="-b=br0"
 
-
 方法二：
 [root@docker ~]# systemctl stop docker
 [root@docker ~]# ip link set dev docker0 down
@@ -179,7 +142,6 @@ DOCKER_NETWORK_OPTIONS="-b=br0"
 [root@docker ~]# docker run -itd --net=none --name=test1 centos:7 /bin/bash
 [root@docker ~]# pipework br0 centos:7 192.168.1.100/24@192.168.1.1
 
-
 方法三[网络连接为DHCP]：
 [root@docker ~]# systemctl stop docker
 [root@docker ~]# systemctl disable NetworkManager
@@ -196,24 +158,15 @@ DOCKER_NETWORK_OPTIONS="-b=br0"
 [root@docker ~]# pipework br0 centos:7 192.168.1.100/24@192.168.1.1
 Docker 使用 OpenvSwitch 网桥
 
-
-save 【持久化镜像】导入导出：
-[root@docker ~]# docker save centos:7 > /home/save.tar
-[root@docker ~]# docker load < /home/save.tar
-export【持久化容器】导入导出：
-[root@docker ~]# docker export [id] > [imagesname.tar]   导出镜像
-[root@docker ~]# cat /home/export.tar | docker import - busybox-1-export:latest
-
-
-Docker提供了一个非常强大的命令diff，它可以列出容器内发生变化的文件和目录。
-这些变化包括添加（A-add）、删除（D-delete）、修改（C-change）。
-该命令便于Debug，并支持快速的共享环境。
-[root@docker ~]# docker diff container
-
-
-远程路径导入：
-[root@docker ~]# docker import http://example.com/test.tar
-
+http://cloud.51cto.com/art/201412/461261.htm
+联合文件系统（UnionFS）是一种分层、轻量级并且高性能的文件系统，它支持对文件系统的修改作为一次提交来一层层的叠加，
+同时可以将不同目录挂载到同一个虚拟文件系统下(unite several directories into a single virtual filesystem)。
+联合文件系统是 Docker 镜像的基础。镜像可以通过分层来进行继承，基于基础镜像（没有父镜像），可以制作各种具体的应用镜像。
+另外，不同 Docker 容器就可以共享一些基础的文件系统层，同时再加上自己独有的改动层，大大提高了存储的效率。
+Docker 中使用的 AUFS（AnotherUnionFS）就是一种联合文件系统。 
+AUFS 支持为每一个成员目录（类似 Git 的分支）设定只读（readonly）、读写（readwrite）和写出（whiteout-able）权限, 同时 AUFS 里有一个类似分层的概念, 
+对只读权限的分支可以逻辑上进行增量地修改(不影响只读部分的)。
+Docker 目前支持的联合文件系统种类包括 AUFS, btrfs, vfs 和 DeviceMapper。
 
 ---> docker数据卷
 创建一个数据卷挂载到容器的/webapp目录：
@@ -232,8 +185,20 @@ docker run -rm -d /root/.bash_history:/.bash_history centos7 /bin/bash
 # docker run -itd --volumes-from=volumes1 --volume-driver=/mydata --name votest2 centos:6.8
 3.>> 三个容器共享/mydata数据卷，都可以读写
 注意：数据卷容器自身(volumes)并不需要保持运行状态！即使删除容器db1,db2，数据卷容器mydata里面的数据依旧存在；
-
-
+[root@CentOS7 ~]# lsblk 
+NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda               8:0    0    8G  0 disk 
+├─sda1            8:1    0  500M  0 part /boot
+└─sda2            8:2    0  7.5G  0 part 
+  ├─centos-root 253:0    0  6.7G  0 lvm  /
+  └─centos-swap 253:1    0  820M  0 lvm  [SWAP]
+sdb               8:16   0    8G  0 disk 
+sr0              11:0    1 1024M  0 rom  
+[root@CentOS7 ~]# lvs -a
+  LV   VG     Attr       LSize   Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  root centos -wi-ao----   6.67g                                                    
+  swap centos -wi-ao---- 820.00m
+  
 
 容器互联：
 <在两个互联的容器之间创建了一个安全隧道，而且不用映射它们的端口到宿主机，避免暴漏数据库端口到外部网络上>
@@ -256,8 +221,22 @@ ExecStart=/usr/bin/docker-current daemon $DOCKER_OPTS \
           ........
 [root@Mini ~]# systemctl daemon-reload && systemctl restart docker
 
+### Ubuntu install Docker-engine
+sudo apt-get update
+E: Could not get lock /var/lib/apt/lists/lock - open (11: Resource temporarily unavailable)
+E: Unable to lock the list directory
+原因：刚装好的Ubantu系统，内部缺少很多软件源，这时，系统会自动启动软件源更新进程“apt-get”，并且它会一直存活。
+由于它在运行时，会占用软件源更新时的系统锁（以下称“系统更新锁”，此锁文件在“/var/lib/apt/lists/”目录下），
+而当有新的apt-get进程生成时，就会因为得不到系统更新锁而出现"E: 无法获得锁 /var/lib/apt/lists/lock - open (11: Resource temporarily unavailable)"错误提示！
+因此，我们只要将原先的apt-get进程杀死，从新激活新的apt-get进程，就可以让新立德软件管理器正常工作了！
 
-
+sudo rm /var/lib/dpkg/lock
+sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates
+sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+sudo echo "deb https://apt.dockerproject.org/repo ubuntu-xenial main" > /etc/apt/sources.list.d/docker.list
+sudo apt-get update
+sudo apt-get install docker-engine
 Ubuntu:
 root@docker:~# cat /etc/default/docker|egrep -v "^$|^#"
 DOCKER_OPTS="-H unix:///var/run/docker.sock -H 0.0.0.0:2375"
@@ -275,8 +254,10 @@ root@jay:/sys/fs/cgroup#
 
 ### Compose
 https://docs.docker.com/compose/install/
+https://docs.docker.com/compose/compose-file/#versioning
 curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` \
 >/usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 
 ### Shipyard
 https://shipyard-project.com/
