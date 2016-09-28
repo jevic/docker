@@ -18,7 +18,7 @@
 	    endscript
 	}
 	[root@node1 logrotate.d]# cat ../rsyslog.conf |grep nginx
-	local1.* 
+	local1.* 						/var/log/nginx.log
 	[root@node1 ]# docker run -d --name n8 --log-driver=syslog --log-opt syslog-facility=local1 -p 88:80 nginx:v1
 	[root@node1 ]# ls /var/log/nginx.log
 	待解决问题： message 和nginx.log 都有输出？？？？
