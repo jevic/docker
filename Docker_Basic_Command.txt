@@ -26,8 +26,14 @@ gpgkey=https://yum.dockerproject.org/gpg
 EOF
 
 开启守护进程[本地和网络]
-# vim /usr/lib/systemd/system/docker.service
-ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
+ExecStart=/usr/bin/dockerd --insecure-registry docker01:5000 \ 私有仓库设置
+-H tcp://0.0.0.0:2380 \
+-H unix:///var/run/docker.sock \    // 
+--registry-mirror=http://df4b377c.m.daocloud.io  // 添加DaoCloud 加速器
+
+自动安装加速器脚本:
+curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://df4b377c.m.daocloud.io
+
 
 # sudo yum install docker-engine
 # sudo systemctl enable docker
