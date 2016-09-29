@@ -25,12 +25,20 @@
 
 ### journald日志驱动：
 	https://docs.docker.com/engine/admin/logging/journald/
+	首先容器的日志设置要为stdout、stderr 
 	# docker run -d --name n1 --log-driver=journald -p 90:80 nginx
 	# journalctl CONTAINER_NAME=n1
+	使用python脚本收集日志:
+	# yum install python-systemd -y
+	# cat log.py
+	#!/usr/bin/python
+	import systemd.journal
+	reader = systemd.journal.Reader()
+	reader.add_match('CONTAINER_NAME=web')
+
+	for msg in reader:
+	  print '{CONTAINER_ID_FULL}: {MESSAGE}'.format(**msg)
 	
 ### fluentd 日志驱动
 	下载镜像：https://hub.docker.com/r/fluent/fluentd/
 	https://docs.docker.com/engine/admin/logging/fluentd/
-
-
-
