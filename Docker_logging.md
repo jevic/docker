@@ -14,12 +14,12 @@
 	#[ -f $nginx_pid_file ] && /bin/kill -USR1 $(cat $nginx_pid_file)
 
 ### 设置syslog 驱动：
-	关于rsyslog 详细使用说明查看[鸟哥Linux私房菜文档-第十九章、认识与分析登录文件](http://cn.linux.vbird.org/linux_basic/0570syslog.php)
+	关于rsyslog 详细使用说明查看 [鸟哥Linux私房菜文档-第十九章、认识与分析登录文件](http://cn.linux.vbird.org/linux_basic/0570syslog.php)
 	[root@node1 ]# cat /etc/rsyslog.conf
 	.........
 	# Log anything (except mail) of level info or higher.
 	# Don't log private authentication messages!
-	*.info;mail.none;authpriv.none;cron.none;**local1.none;local2.none**     /var/log/messages  //不将日志重复输出到messages文件
+	*.info;mail.none;authpriv.none;cron.none;local1.none;local2.none     /var/log/messages  //不将日志重复输出到messages文件
 	local1.* 						/var/log/nginx     // 添加此项
 	& ~
 	local2.*						/var/log/web2log    // 添加此项
