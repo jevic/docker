@@ -19,7 +19,7 @@
 	.........
 	# Log anything (except mail) of level info or higher.
 	# Don't log private authentication messages!
-	*.info;mail.none;authpriv.none;cron.none;`local1.none;local2.none`     /var/log/messages  //不将日志重复输出到messages文件
+	*.info;mail.none;authpriv.none;cron.none;**local1.none;local2.none**     /var/log/messages  //不将日志重复输出到messages文件
 	local1.* 						/var/log/nginx     // 添加此项
 	& ~
 	local2.*						/var/log/web2log    // 添加此项
