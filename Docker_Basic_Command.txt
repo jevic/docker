@@ -26,13 +26,13 @@ gpgkey=https://yum.dockerproject.org/gpg
 EOF
 
 开启守护进程[本地和网络]
-ExecStart=/usr/bin/dockerd --insecure-registry docker01:5000 \ 私有仓库设置
--H tcp://0.0.0.0:2380 \
--H unix:///var/run/docker.sock \    // 
---registry-mirror=http://df4b377c.m.daocloud.io  // 添加DaoCloud 加速器
+# vim /usr/lib/systemd/system/docker.service
+ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
 
-自动安装加速器脚本:
-curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://df4b377c.m.daocloud.io
+--live-restore
+1.12引入，默认关闭，启用后daemon故障或关闭后容器依然运行，重启docker engine后恢复原状(针对热升级)
+$ sudo dockerd --live-restore
+https://docs.docker.com/engine/admin/live-restore/#enable-the-live-restore-option
 
 
 # sudo yum install docker-engine
@@ -52,28 +52,19 @@ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://df4b377c
 -h hostname 指定主机名
 “--restart=always” 容器自动启动参数
 [root@docker ~]# docker run [--rm] [-d] -i -t centos7 /bin/bash    进入docker镜像
-[root@docker ~]# cat testjob.tar |docker import - testjob
 [root@docker ~]# docker ps -l 
 [root@docker ~]# docker stop id
 [root@docker ~]# docker start id
-
 [root@docker ~]# docker inspect mytest   【检查容器运行状态信息】
 [root@docker ~]# docker inspect -f {{   }}   ID
 [root@docker ~]# docker stats testssh   【实时查看Container负载】
 [root@docker ~]# docker logs -f mysql
-
 [root@docker ~]# docker exec -it id /bin/bash  【exit退出后，容器依旧运行】
-[root@docker ~]# docker attach id    进入一个容器【exit退出后，容器关闭】
 [root@docker ~]# docker rm id  删除容器
 [root@docker ~]# docker rmi images 删除容器
-
-
 [root@docker ~]# docker ps -a | grep "Exited" | awk '{print $1 }'|xargs docker stop
 [root@docker ~]# docker ps -a | grep "Exited" | awk '{print $1 }'|xargs docker rm
-[root@docker ~]# docker images|grep none|awk '{print $3 }'|xargs docker rmi
-清空所有异常退出后的容易，再到images删除就没有了。 
-[root@docker ~]# docker rmi -f 9503b09c1a70
-Deleted: 9503b09c1a707d29b084e18aa13ef5d66f43672e41dce4db5931cbf2a754daa1
+
 
 Docker提供了一个非常强大的命令diff，它可以列出容器内发生变化的文件和目录。
 这些变化包括添加（A-add）、删除（D-delete）、修改（C-change）。
@@ -91,11 +82,11 @@ export【持久化容器】导入导出：
 
 5. 保存对容器的修改（commit）
 当你对某一个容器做了修改之后（通过在容器中运行某一个命令），可以把对容器的修改保存下来，这样下次可以从保存后的最新状态运行该容器。
+不建议使用此命令来构建镜像,里面的操作无法进行查看[黑箱操作]，构建镜像请使用Dockerfile
 # 保存对容器的修改; -a, --author="" Author; -m, --message="" Commit message
 docker ps -l 查看ID
 [root@docker ~]# docker commit ID new_image_name
 Note:image相当于类，container相当于实例，不过可以动态给实例安装新软件，然后把这个container用commit命令固化成一个image
-[root@docker ~]# docker rm $(docker ps -q -a)    #删除所有运行的容器
 
 ---->>>
 将容器中的文件拷贝到主机上
@@ -103,7 +94,7 @@ Usage: docker cp CONTAINER:PATH HOSTPATH
 [root@docker ~]# docker cp testip:/tmp/testaa /tmp
 
 
-【私有仓库构建】
+【私有仓库构建】镜像的传输建议使用registry 
 https://docs.docker.com/registry/deploying/
 https://docs.docker.com/engine/reference/commandline/dockerd/#insecure-registries
 # docker run -d -p 5000:5000 registry  
@@ -113,7 +104,7 @@ daemon -->>>>    --insecure-registry myregistry:5000
 
 
 -p:指定容器启动后docker上运行的端口映射，第一个为主机端口第二个为容器里的端口
-[root@docker ~]# docker run -d -p 80:80 -p 8022:22 centos/lamp
+[root@docker ~]# docker run -d -p 80:80 -p 8022:22 -p 2000-3000:2000-3000 centos/lamp
 自启动容器：
 docker run -d --restart=always --name test centos:7 /bin/bash
 
@@ -213,6 +204,9 @@ docker run -d -P  --name=name --link container_name:alias images_name <Command>
 docker run -d -P --name=web --link mysql:db centos:7 /bin/bash
 
 
+
+
+
 docker 【本地和网络】守护进程：
 https://docs.docker.com/engine/reference/commandline/dockerd/#insecure-registries
 CentOS7: --->>> Docker1.10
@@ -227,6 +221,11 @@ ExecStart=/usr/bin/docker-current daemon $DOCKER_OPTS \
           ........
 [root@Mini ~]# systemctl daemon-reload && systemctl restart docker
 
+
+
+对应旧版本需要升级内核(4.4)：
+sudo apt-get install -y --install-recommends linux-generic-lts-xenial
+reboot
 ### Ubuntu install Docker-engine
 sudo apt-get update
 E: Could not get lock /var/lib/apt/lists/lock - open (11: Resource temporarily unavailable)
@@ -261,6 +260,8 @@ root@jay:/sys/fs/cgroup#
 ### Compose
 https://docs.docker.com/compose/install/
 https://docs.docker.com/compose/compose-file/#versioning
+https://docs.docker.com/compose/networking/#using-a-pre-existing-network   // 扩展网络设置
+
 curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` \
 >/usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
