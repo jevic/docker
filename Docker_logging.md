@@ -14,7 +14,7 @@
 	#[ -f $nginx_pid_file ] && /bin/kill -USR1 $(cat $nginx_pid_file)
 
 ### 设置syslog 驱动：
-	关于rsyslog 详细使用说明查看 [鸟哥Linux私房菜文档-第十九章、认识与分析登录文件](http://cn.linux.vbird.org/linux_basic/0570syslog.php)
+关于rsyslog 详细使用说明查看 [鸟哥Linux私房菜文档-第十九章、认识与分析登录文件](http://cn.linux.vbird.org/linux_basic/0570syslog.php)
 	[root@node1 ]# cat /etc/rsyslog.conf
 	.........
 	# Log anything (except mail) of level info or higher.
