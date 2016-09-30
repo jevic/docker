@@ -49,8 +49,7 @@
 	-rw------- 1 root root  89K 9月  30 10:45 /var/log/dp1web
 	-rw------- 1 root root 6.0K 9月  30 10:48 /var/log/nginx
 
-### journald日志驱动：
-	https://docs.docker.com/engine/admin/logging/journald/
+### [journald日志驱动](https://docs.docker.com/engine/admin/logging/journald/)
 	首先容器的日志设置要为stdout、stderr 
 	# docker run -d --name n1 --log-driver=journald -p 90:80 nginx
 	# journalctl CONTAINER_NAME=n1
@@ -65,9 +64,7 @@
 	for msg in reader:
 	  print '{CONTAINER_ID_FULL}: {MESSAGE}'.format(**msg)
 	
-### fluentd 日志驱动
-	下载镜像：https://hub.docker.com/r/fluent/fluentd/
-	https://docs.docker.com/engine/admin/logging/fluentd/
-	fluentd官网文档(http://docs.fluentd.org/)
-	check config file:
-	$ fluentd --dry-run -c fluent.conf
+### [fluentd日志驱动](https://docs.docker.com/engine/admin/logging/fluentd/) [下载镜像](https://hub.docker.com/r/fluent/fluentd/)
+#### [fluentd官网文档](http://docs.fluentd.org/)
+> check config file:
+> $ fluentd --dry-run -c fluent.conf
