@@ -42,3 +42,7 @@
 ### fluentd 日志驱动
 	下载镜像：https://hub.docker.com/r/fluent/fluentd/
 	https://docs.docker.com/engine/admin/logging/fluentd/
+	fluentd官网文档(http://docs.fluentd.org/)
+```check config file:
+$ fluentd --dry-run -c fluent.conf
+```
