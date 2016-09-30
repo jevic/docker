@@ -65,6 +65,6 @@ swarm 中的所有主机都可以路由 ingress connections 到一个正在运�
 * Swarm mode 有一个内部的 DNS 组件来自动为每个 service 分配 DNS 入口。 swarm manager 根据 service 在集群中的 DNS name 使用内部负载均衡来分发请求。
 
 ## 参考文档
-> [Docker 1.12迎来内置编排机制](http://dockone.io/article/1442)
-> [Docker 1.12: Now With Built-In Orchestration!](https://blog.docker.com/2016/06/docker-1-12-built-in-orchestration/)
-> [Swarm mode overview](https://docs.docker.com/engine/swarm/)
+* [Docker 1.12迎来内置编排机制](http://dockone.io/article/1442)
+* [Docker 1.12: Now With Built-In Orchestration!](https://blog.docker.com/2016/06/docker-1-12-built-in-orchestration/)
+* [Swarm mode overview](https://docs.docker.com/engine/swarm/)
