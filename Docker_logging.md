@@ -31,8 +31,8 @@
 	/var/log/messages
 	/var/log/secure
 	/var/log/spooler
-	`/var/log/nginx`      //添加此项
-    `/var/log/web2log`    // 添加此项,默认将会在/var/log 下创建对应文件并写入日志
+	/var/log/nginx     //添加此项
+    /var/log/web2log    // 添加此项,默认将会在/var/log 下创建对应文件并写入日志
 	{
 	    missingok
 	    sharedscripts
@@ -41,9 +41,9 @@
 	    endscript
 	}
 	
-	启动容器[`syslog-facility` --> 此项对应设置的日志]
-	[root@node1 ]# docker run -d --name nginx --log-driver=syslog --log-opt syslog-facility=`local1` -p 81:80 nginx:v1
-	[root@node1 ]# docker run -d --name web2 --log-driver=syslog --log-opt syslog-facility=`local2` -p 82:80 nginx:v1
+	启动容器[syslog-facility --> 此项对应设置的日志]
+	[root@node1 ]# docker run -d --name nginx --log-driver=syslog --log-opt syslog-facility=local1 -p 81:80 nginx:v1
+	[root@node1 ]# docker run -d --name web2 --log-driver=syslog --log-opt syslog-facility=local2 -p 82:80 nginx:v1
 	访问链接查看日志：
 	[root@node1 ]# ll -h /var/log/{nginx,dp1web}
 	-rw------- 1 root root  89K 9月  30 10:45 /var/log/dp1web
@@ -66,5 +66,5 @@
 	
 ### [fluentd日志驱动](https://docs.docker.com/engine/admin/logging/fluentd/) [下载镜像](https://hub.docker.com/r/fluent/fluentd/)
 #### [fluentd官网文档](http://docs.fluentd.org/)
-> check config file:
-> $ fluentd --dry-run -c fluent.conf
+* check config file:
+*fluentd --dry-run -c fluent.conf*
