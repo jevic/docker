@@ -16,6 +16,8 @@ reboot
 uname -r 
 
 ### 安装docker 最新版本：
+https://docs.docker.com/engine/installation/linux/centos/
+$ curl -fsSL https://get.docker.com/ | sh     //通过脚本安装
 # tee /etc/yum.repos.d/docker.repo <<-'EOF'
 [dockerrepo]
 name=Docker Repository  
