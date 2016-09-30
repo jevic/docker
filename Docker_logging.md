@@ -50,7 +50,7 @@
 	-rw------- 1 root root 6.0K 9月  30 10:48 /var/log/nginx
 
 ### [journald日志驱动](https://docs.docker.com/engine/admin/logging/journald/)
-	首先容器的日志设置要为stdout、stderr 
+### 首先确保镜像的日志输出为stdout、stderr 
 	# docker run -d --name n1 --log-driver=journald -p 90:80 nginx
 	# journalctl CONTAINER_NAME=n1
 	使用python脚本收集日志:
@@ -66,5 +66,7 @@
 	
 ### [fluentd日志驱动](https://docs.docker.com/engine/admin/logging/fluentd/) [下载镜像](https://hub.docker.com/r/fluent/fluentd/)
 #### [fluentd官网文档](http://docs.fluentd.org/)
-* check config file:
-*fluentd --dry-run -c fluent.conf*
+####　首先确保镜像的日志输出为stdout、stderr 
+#### [查看应用示例](https://coding.net/u/twang2218/p/docker-example/git/tree/master/fluentd)
+	check config file:
+	# fluentd --dry-run -c fluent.conf*
