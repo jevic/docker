@@ -77,6 +77,6 @@
 	    - /path/data:/var/lib/registry
 	    - /path/certs:/certs
 	    - /path/auth:/auth
-##### 参考链接
-	[nginx代理认证](https://docs.docker.com/registry/recipes/nginx/)
-	[deploying](https://docs.docker.com/registry/deploying/)
+#### 参考链接
+###### [nginx代理认证](https://docs.docker.com/registry/recipes/nginx/)
+###### [deploying](https://docs.docker.com/registry/deploying/)
