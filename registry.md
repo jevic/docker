@@ -58,9 +58,9 @@
 	10: digest: sha256:d76a8cfb65f5f431916dde1eed84e72d37df26366564aa613219ddc1d8daa6d6 size: 1154
 
 #### <span id = "2">配置用户名密码认证</span>
-> yum install httpd-tools
-> mkdir -p /opt/registry/auth
-> htpasswd -c /opt/registry/auth/htpasswd testuser
+	yum install httpd-tools
+	mkdir -p /opt/registry/auth
+	htpasswd -c /opt/registry/auth/htpasswd testuser
 #### <span id="3">Composefile:</span>
 	registry:
 	  restart: always
@@ -78,5 +78,5 @@
 	    - /path/certs:/certs
 	    - /path/auth:/auth
 ##### 参考链接
-[nginx代理认证](https://docs.docker.com/registry/recipes/nginx/)
-[deploying](https://docs.docker.com/registry/deploying/)
+	[nginx代理认证](https://docs.docker.com/registry/recipes/nginx/)
+	[deploying](https://docs.docker.com/registry/deploying/)
