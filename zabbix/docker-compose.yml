@@ -1,0 +1,61 @@
+## 使用外部数据库
+version: '2'
+services:
+ zabbix-java-gateway:
+  image: "${Zabbix_Java}"
+  ports:
+   - "10052:10052"
+  container_name: zabbix-java-gateway
+  environment:
+   TZ: ${TZ}
+  tty: true
+  networks:
+   - zbx-net
+ zabbix-server:
+  image: "${Zabbix_Server}"
+  container_name: zabbix-server-mysql
+  ports:
+   - "10051:10051"
+  environment:
+   DB_SERVER_HOST: ${DB_SERVER_HOST}
+   MYSQL_DATABASE: ${MYSQL_DATABASE}
+   MYSQL_USER: ${MYSQL_USER}
+   MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+   MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+   ZBX_JAVAGATEWAY: ${ZBX_JAVAGATEWAY}
+   TZ: ${TZ}
+  volumes:
+   - ${DATA_PATH}/alertscripts:/usr/lib/zabbix/alertscripts:ro
+   - ${DATA_PATH}/externalscripts:/usr/lib/zabbix/externalscripts:ro
+   - ${LOCAL_TIME}:${LOCAL_TIME}:ro
+  networks:
+   - zbx-net
+  links:
+   - zabbix-java-gateway:zabbix-java-gateway
+  depends_on: 
+   - zabbix-java-gateway
+ zabbix-web-nginx:
+  image: "${Zabbix_WebServer}"
+  container_name: zabbix-web-nginx
+  ports:
+   - "80:80"
+  environment:
+   DB_SERVER_HOST: ${DB_SERVER_HOST}
+   MYSQL_DATABASE: ${MYSQL_DATABASE}
+   MYSQL_USER: ${MYSQL_USER}
+   MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+   MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+   PHP_TZ: ${PHP_TZ}
+   TZ: ${TZ}
+  volumes:
+   - ${DATA_PATH}/fonts/DejaVuSans.ttf:/usr/share/fonts/ttf-dejavu/DejaVuSans.ttf:ro
+   - ${LOCAL_TIME}:${LOCAL_TIME}:ro
+  links:
+   - zabbix-server:zabbix-server
+  networks:
+   - zbx-net
+  depends_on: 
+   - zabbix-server
+
+networks:
+  zbx-net:

@@ -1,0 +1,13 @@
+#!/bin/bash
+wechat()
+{
+        DT_ADDR='dtsend.yfcloud.com'
+        #处理下编码，用于合并告警内容的标题和内容
+        #中文需要utf8编码并进行urlencode
+        message=$(echo -e "$title\n$content"|od -t x1 -A n -v -w1000000000 | tr " " %)
+        DT_URL="http://$DT_ADDR/send_message?content=$message"
+        /usr/bin/curl $DT_URL
+}
+title=$1
+content=$2
+wechat
