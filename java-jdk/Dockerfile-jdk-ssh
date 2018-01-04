@@ -10,7 +10,7 @@ RUN yum install -y wget openssh-server openssh-clients which rsync \
 
 ## Java
 RUN cd /opt \
-    && wget http://download.oracle.com/otn-pub/java/jdk/8u151-b12/e758a0de34e24606bca991d704f6dcbf/jdk-8u151-linux-x64.tar.gz?AuthParam=1515068080_1d3c479aafacbdbaf68684a7cb239b85
+    && wget http://download.oracle.com/otn-pub/java/jdk/8u151-b12/e758a0de34e24606bca991d704f6dcbf/jdk-8u151-linux-x64.tar.gz?AuthParam=1515068080_1d3c479aafacbdbaf68684a7cb239b85 \
     && mv jdk-8u151-linux-x64.tar.gz?AuthParam=1515068080_1d3c479aafacbdbaf68684a7cb239b85 jdk-8u151-linux-x64.tar.gz \
     && tar zxf jdk-8u151-linux-x64.tar.gz && mv jdk1.8.0_151 jdk \
     && chown root.root -R /opt/jdk && rm -rf *.gz
