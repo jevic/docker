@@ -15,6 +15,7 @@ RUN cd /opt && wget http://ftp.kernel.yunfan.com/docker/java/$JDK \
     && chown root.root -R /opt/jdk && rm -rf *.gz
 
 ## SSH
+COPY config /root/.ssh/config
 RUN set -e \
     && ssh-keygen -q -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key -N '' \
     && ssh-keygen -q -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N '' \
@@ -25,7 +26,6 @@ RUN set -e \
     && chmod 600 /root/.ssh/config \
     && echo "root:P@sswd123456" | chpasswd
 
-ADD config /root/.ssh/
 
 ENV CLASSPATH .:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/jre/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV PATH ${JAVA_HOME}/bin:$PATH
