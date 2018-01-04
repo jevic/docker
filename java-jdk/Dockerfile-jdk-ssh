@@ -22,9 +22,10 @@ RUN set -e \
     && ssh-keygen -f /root/.ssh/id_rsa -N '' \
     && cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys \
     && chmod 600 /root/.ssh/authorized_keys \
-    && cd /root/.ssh && wget http://ftp.kernel.yunfan.com/docker/hadoop/config \
     && chmod 600 /root/.ssh/config \
     && echo "root:P@sswd123456" | chpasswd
+
+ADD config /root/.ssh/
 
 ENV CLASSPATH .:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/jre/lib/dt.jar:$JAVA_HOME/lib/tools.jar
 ENV PATH ${JAVA_HOME}/bin:$PATH
