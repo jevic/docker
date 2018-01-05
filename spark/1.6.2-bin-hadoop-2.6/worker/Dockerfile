@@ -1,4 +1,4 @@
-FROM jevic/jdk:8u151-openssh
+FROM jevic/jdk:8u144-openssh
 
 ENV SPARK_TGZ spark-1.6.2-bin-hadoop2.6
 

@@ -1,4 +1,4 @@
-FROM jevic/jdk:8u151-openssh
+FROM jevic/jdk:8u144-openssh
 
 COPY bootstrap.sh /etc/bootstrap.sh
 

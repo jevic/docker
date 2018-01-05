@@ -1,32 +1,6 @@
-FROM centos:7.2.1511
-MAINTAINER jieyang <admin@jevic.cn>
-ENV EFRESHED_AT 2017-12-30
-ENV TZ Asia/Shanghai
-ENV JAVA_HOME /opt/jdk
+FROM jevic/jdk:8u144-openssh
 
-## 安装运行依赖
-RUN yum install -y wget openssh-server openssh-clients which rsync \
-    && rm -rf /tmp/* && yum clean all
-
-## Java
-RUN cd /opt \
-    && wget http://soft.jevic.cn/java/jdk-8u144-linux-x64.tar.gz \
-    && tar zxf jdk-8u144-linux-x64.tar.gz \
-    && mv jdk1.8.0_144 jdk \
-    && chown root.root -R /opt/jdk && rm -rf *.gz
-
-## SSH
-RUN set -e \
-    && ssh-keygen -q -t rsa -b 2048 -f /etc/ssh/ssh_host_rsa_key -N '' \
-    && ssh-keygen -q -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N '' \
-    && ssh-keygen -q -t dsa -f /etc/ssh/ssh_host_ed25519_key  -N '' \
-    && ssh-keygen -f /root/.ssh/id_rsa -N '' \
-    && cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys \
-    && chmod 600 /root/.ssh/authorized_keys \
-    && echo "root:P@sswd123456" | chpasswd
-
-COPY config /root/.ssh/config
-RUN chmod 600 /root/.ssh/config
-
-ENV CLASSPATH .:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/jre/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-ENV PATH ${JAVA_HOME}/bin:$PATH
+COPY install-crond.sh /tmp/install.sh
+RUN chmod + /tmp/install.sh \
+    && /tmp/install.sh \
+    && rm -rf /tmp/*
