@@ -6,6 +6,7 @@ RUN cd /opt \
     && wget http://mirrors.tuna.tsinghua.edu.cn/apache/spark/spark-2.0.2/spark-2.0.2-bin-hadoop2.7.tgz \
     && tar zxf spark-2.0.2-bin-hadoop2.7.tgz \
     && mv spark-2.0.2-bin-hadoop2.7 spark \
+    && rm -rf spark-2.0.2-bin-hadoop2.7.tgz \
     && cd /opt/spark/conf \
     && cp spark-env.sh.template spark-env.sh \
     && cp slaves.template slaves \
