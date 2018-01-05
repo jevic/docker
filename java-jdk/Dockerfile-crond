@@ -1,0 +1,6 @@
+FROM jevic/jdk:8u144-openssh
+
+COPY install-crond.sh /tmp/install.sh
+RUN chmod +x /tmp/install.sh \
+    && /tmp/install.sh \
+    && rm -rf /tmp/*
