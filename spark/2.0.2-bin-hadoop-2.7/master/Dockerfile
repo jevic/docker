@@ -1,5 +1,9 @@
 FROM jevic/jdk:8u144-openssh
 
+ARG TZ="Asia/Shanghai"
+
+ENV TZ ${TZ}
+
 COPY bootstrap.sh /etc/bootstrap.sh
 
 RUN cd /opt \
@@ -11,7 +15,9 @@ RUN cd /opt \
     && cp spark-env.sh.template spark-env.sh \
     && cp slaves.template slaves \
     && echo "export JAVA_HOME=/opt/jdk" >> spark-env.sh \
-    && chmod +x /etc/bootstrap.sh
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && chmod +x /etc/bootstrap.sh \
+    && chown -R root.root /opt/spark
 
 EXPOSE 8080 8081 7077 4040-4050
 CMD ["/etc/bootstrap.sh","master"]
