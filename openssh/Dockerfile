@@ -15,8 +15,6 @@ RUN set -e \
     && ssh-keygen -f /root/.ssh/id_rsa -N '' \
     && cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys \
     && chmod 600 /root/.ssh/authorized_keys \
-    && cd /root/.ssh \
-    && chmod 600 /root/.ssh/config \
     && echo "root:P@sswd123456" | chpasswd \
     && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
 
