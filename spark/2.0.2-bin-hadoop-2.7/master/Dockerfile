@@ -1,9 +1,6 @@
 FROM jevic/jdk:8u144-openssh
 
-ARG TZ="Asia/Shanghai"
-
-ENV TZ ${TZ}
-
+ENV TZ="Asia/Shanghai"
 COPY bootstrap.sh /etc/bootstrap.sh
 
 RUN cd /opt \
