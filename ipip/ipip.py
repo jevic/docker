@@ -1,7 +1,7 @@
 # coding: utf-8
 # Auth: jieyang <jieyang@gmail.com>
 # Version: 1.0
-#
+# ip 归属地查询
 import os,sys
 import datx
 from flask import Flask,request,jsonify
