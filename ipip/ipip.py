@@ -1,26 +1,26 @@
 # coding: utf-8
 # Auth: jieyang <jieyang@gmail.com>
 # Version: 1.0
-# ip 归属地查询
-import os,sys
+#
+# import json
 import datx
 from flask import Flask,request,jsonify
 
-
 app = Flask(__name__)
-F_PATH = os.path.split(os.path.realpath(sys.argv[0]))[0]
-Files = F_PATH + '/ipip.datx' 
+app.config['JSON_AS_ASCII'] = False
 
-@app.route('/')
-def IPIP():
-    try:
-        content = request.args.get('ip')
-        if content:
-            code = datx.City(Files)
-            data = code.find(content)
-            return jsonify(data)
+@app.route('/<content>')
+def IPIP(content):
+    try:  
+        code = datx.City('/ipip/ipip.datx')
+        data = code.find(content)
+        country = data[0]
+        region = data[1]
+        city = data[2]
+        isp = data[4]
+        return jsonify(IP=content,country=country,region=region,city=city,isp=isp)
     except Exception as error:
         return error
 
 if __name__ == '__main__':
-   app.run(host='0.0.0.0',port=51001)
+   app.run(host='0.0.0.0',port=5100)

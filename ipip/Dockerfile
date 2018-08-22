@@ -8,5 +8,5 @@ RUN set -e && mkdir /ipip \
     && wget http://p1awgv97o.bkt.clouddn.com/ipip.datx
 
 COPY ipip.py /ipip
-EXPOSE 51000
+EXPOSE 5100
 CMD ["python","/ipip/ipip.py"]
