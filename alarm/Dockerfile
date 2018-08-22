@@ -1,12 +1,14 @@
 FROM python:alpine3.7
 MAINTAINER jieyang <yangjie@yfcloud.com>
-ENV EFRESHED_AT 2018-08-20 
+ENV EFRESHED_AT 2018-08-22
 
 ENV TZ Asia/Shanghai
-RUN pip install flask urllib3
+COPY docker-entrypoint.sh /
+
+RUN pip install flask urllib3 \
+    && chmod +x /docker-entrypoint.sh
 
 COPY ./alarm /alarm
-COPY docker-entrypoint.sh /
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 EXPOSE 51000
