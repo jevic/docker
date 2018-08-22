@@ -77,5 +77,14 @@ def wechat(title,content):
         except:
             print "error"
 
+```
+
+### 文件上传
 
 ```
+curl -X POST \
+http://127.0.0.1:51000/upload \
+-F 'file=@D:\NextCloud\record-document.log'
+
+```
+![](http://ok6h8mla5.bkt.clouddn.com/upload-postman.jpg)
