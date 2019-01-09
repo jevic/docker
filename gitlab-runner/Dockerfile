@@ -1,4 +1,4 @@
-FROM gitlab/gitlab-runner:v10.4.0
+FROM gitlab/gitlab-runner:v11.1.4
 RUN curl -O https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz  \
     && tar zxvf docker-latest.tgz \
     && cp docker/docker /usr/local/bin/ \
