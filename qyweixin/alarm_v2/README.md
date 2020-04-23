@@ -18,8 +18,17 @@ print(response.text)
 ## Shell
 
 ```
+#!/bin/bash
+
+wechat(){
 curl -X POST \
-  http://192.168.1.12:5100/alarm \
+  http://127.0.0.1:5100/alarm \
   -H 'Content-Type: application/json' \
-  -d '{"msg":"xxx页面访问异常"}'
+  -d '{
+    "msg": "'$msg'"
+}'
+}
+
+msg='test'
+wechat
 ```
